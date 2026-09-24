@@ -14,7 +14,6 @@ import { gql } from "@apollo/client";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { Link } from "react-router-dom";
 import { Grid } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNotification } from "../context/NotificationContext";
 import ResponsiveDialog from "./Dialog";
@@ -118,11 +117,10 @@ const SongList = () => {
           <TableBody>
             {data?.songs?.map((song) => (
               <StyledTableRow key={song.id} className="song-row">
-                <TableCell>{song.title}</TableCell>
+                <TableCell>
+                  <Link to={`/song/${song.id}`}>{song.title}</Link>
+                </TableCell>
                 <TableCell sx={{ justifyContent: "flex-end", display: "flex", gap: 1 }}>
-                  <Link to={`/song/${song.id}`}>
-                    <EditIcon sx={{ color: "primary.main" }} />
-                  </Link>
                   <DeleteIcon sx={{ color: "error.main", cursor: "pointer" }} onClick={() => handleDelete(song.id)} />
                 </TableCell>
               </StyledTableRow>

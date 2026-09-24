@@ -8,9 +8,13 @@ import SongCreate from "./components/SongCreate";
 import App from "./components/App";
 // 1. Swap createBrowserRouter for createHashRouter
 import { createHashRouter, RouterProvider } from "react-router-dom";
+import SongDetail from "./components/SongDetail";
 
 const client = new ApolloClient({
-  cache: new InMemoryCache(),
+  dataIdFromObject: (object) => object.id,
+  cache: new InMemoryCache({
+    dataIdFromObject: (object) => object.id,
+  }),
   link: new HttpLink({ uri: "/graphql" }),
 });
 
@@ -27,6 +31,10 @@ const router = createHashRouter([
       {
         path: "song/new", // Note: Remove leading slash for child routes
         element: <SongCreate />,
+      },
+      {
+        path: "song/:id", // Note: Remove leading slash for child routes
+        element: <SongDetail />,
       },
     ],
   },
