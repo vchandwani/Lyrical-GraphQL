@@ -36,6 +36,7 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router": "^8.4.0",
+    "react-router-dom": "^7.18.4",
     "rxjs": "^7.8.2",
     "style-loader": "^4.0.0",
     "webpack": "^5.111.1",

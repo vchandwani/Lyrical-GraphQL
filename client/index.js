@@ -1,24 +1,35 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-// All legacy Apollo packages are replaced by this single consolidated import:
 import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
 import SongList from "./components/SongList";
-import CssBaseline from "@mui/material/CssBaseline";
-import Box from "@mui/material/Box";
+import App from "./components/App";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
-  link: new HttpLink({ uri: "/graphql" }), // Safe for both local dev and production
+  link: new HttpLink({ uri: "/graphql" }),
 });
+
+// Fix 3: Hoist createBrowserRouter outside the component to prevent infinite re-renders
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    children: [
+      {
+        index: true,
+        element: <SongList />,
+      },
+    ],
+  },
+]);
 
 const Root = () => {
   return (
     <ApolloProvider client={client}>
-      <CssBaseline enableColorScheme />
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
-        <SongList />
-      </Box>
+      {/* RouterProvider must be self-closing in modern React Router */}
+      <RouterProvider router={router} />
     </ApolloProvider>
   );
 };
