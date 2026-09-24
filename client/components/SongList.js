@@ -16,7 +16,7 @@ import { Link } from "react-router-dom";
 import { Grid } from "@mui/material";
 
 // Defined the query outside the component (best practice)
-const FETCH_SONGS = gql`
+export const FETCH_SONGS = gql`
   query FetchSongs {
     songs {
       id
