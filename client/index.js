@@ -3,16 +3,18 @@ import { createRoot } from "react-dom/client";
 import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
 import SongList from "./components/SongList";
+import SongCreate from "./components/SongCreate";
 import App from "./components/App";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+// 1. Swap createBrowserRouter for createHashRouter
+import { createHashRouter, RouterProvider } from "react-router-dom";
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
   link: new HttpLink({ uri: "/graphql" }),
 });
 
-// Fix 3: Hoist createBrowserRouter outside the component to prevent infinite re-renders
-const router = createBrowserRouter([
+// 2. Use createHashRouter and relative child paths
+const router = createHashRouter([
   {
     path: "/",
     element: <App />,
@@ -21,6 +23,10 @@ const router = createBrowserRouter([
         index: true,
         element: <SongList />,
       },
+      {
+        path: "song/new", // Note: Remove leading slash for child routes
+        element: <SongCreate />,
+      },
     ],
   },
 ]);
@@ -28,7 +34,6 @@ const router = createBrowserRouter([
 const Root = () => {
   return (
     <ApolloProvider client={client}>
-      {/* RouterProvider must be self-closing in modern React Router */}
       <RouterProvider router={router} />
     </ApolloProvider>
   );
