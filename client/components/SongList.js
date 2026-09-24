@@ -1,5 +1,6 @@
 import React from "react";
 import Spinner from "@mui/material/CircularProgress";
+import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TableContainer from "@mui/material/TableContainer";
@@ -20,6 +21,18 @@ const FETCH_SONGS = gql`
     }
   }
 `;
+
+// Custom styled row targeting alternating types
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:nth-of-type(odd)": {
+    // Uses the built-in theme hover/action color (light gray)
+    backgroundColor: theme.palette.action.hover,
+  },
+  // Hide last border
+  "&:last-child td, &:last-child th": {
+    border: 0,
+  },
+}));
 
 const SongList = () => {
   // Execute the query inside the component using the hook
@@ -47,9 +60,9 @@ const SongList = () => {
           </TableHead>
           <TableBody>
             {data?.songs?.map((song) => (
-              <TableRow key={song.id}>
+              <StyledTableRow key={song.id} className="song-row">
                 <TableCell>{song.title}</TableCell>
-              </TableRow>
+              </StyledTableRow>
             ))}
           </TableBody>
         </Table>
