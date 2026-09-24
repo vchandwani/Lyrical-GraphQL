@@ -1,11 +1,13 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import ApolloClient from "apollo-client";
 import { ApolloProvider } from "react-apollo";
 import { InMemoryCache } from "apollo-cache-inmemory";
+import { HttpLink } from "apollo-link-http";
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
+  link: new HttpLink({ uri: "/graphql" }),
 });
 
 const Root = () => {
@@ -16,4 +18,6 @@ const Root = () => {
   );
 };
 
-ReactDOM.render(<Root />, document.querySelector("#root"));
+const container = document.querySelector("#root");
+const root = createRoot(container);
+root.render(<Root />);
