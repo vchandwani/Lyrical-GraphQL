@@ -1,5 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { NotificationProvider } from "./context/NotificationContext";
 import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
 import SongList from "./components/SongList";
@@ -34,7 +35,9 @@ const router = createHashRouter([
 const Root = () => {
   return (
     <ApolloProvider client={client}>
-      <RouterProvider router={router} />
+      <NotificationProvider>
+        <RouterProvider router={router} />
+      </NotificationProvider>
     </ApolloProvider>
   );
 };

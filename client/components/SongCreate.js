@@ -1,26 +1,15 @@
 import React, { useState } from "react";
-import CloseIcon from "@mui/icons-material/Close";
-import {
-  Box,
-  Button,
-  Typography,
-  TextField,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  FormGroup,
-  Checkbox,
-  FormHelperText,
-  CircularProgress,
-  Snackbar,
-} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { Box, Button, Typography, TextField, CircularProgress } from "@mui/material";
 
+// Fix 1: Import useMutation directly from @apollo/client
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
+import { useNotification } from "../context/NotificationContext";
 
-// add Mutation for creating a new song
+// Import your query if you have it exported, or define a reference to refetch
+import { FETCH_SONGS } from "./SongList"; // (Assuming you export your query from SongList)
+
 const AddSong = gql`
   mutation AddSong($title: String) {
     addSong(title: $title) {
@@ -30,77 +19,54 @@ const AddSong = gql`
   }
 `;
 
-export default function AdvancedMuiForm() {
-  // 1. Unified state for all field types
+export default function SongCreate() {
+  const navigate = useNavigate();
+  const { showNotification } = useNotification();
+
   const [formData, setFormData] = useState({
     title: "",
   });
-  const [open, setOpen] = useState(false);
-  const [notification, setNotification] = useState("");
 
-  const handleClose = () => {
-    setOpen(false);
-    setNotification("");
-  };
-  const action = (
-    <Button color="primary" size="small" onClick={handleClose}>
-      <CloseIcon />
-    </Button>
-  );
-
-  // 2. State for validation errors
   const [errors, setErrors] = useState({});
-  const [addSong, { loading, error }] = useMutation(AddSong, {
-    onCompleted: (data) => {
-      console.log("Song created successfully:", data);
-      setOpen(true);
-      setNotification("Song created successfully");
-      setTimeout(() => setOpen(false), 6000); // Automatically close the Snackbar after 6 seconds
-      // Reset the form input on success
+
+  const [addSong, { loading }] = useMutation(AddSong, {
+    // Fix 2: Tell Apollo to refetch the song list query so the UI updates instantly
+    refetchQueries: [{ query: FETCH_SONGS }],
+    onCompleted: () => {
+      showNotification("Song created successfully!", "success");
       setFormData({ title: "" });
+      navigate("/");
     },
     onError: (err) => {
-      console.error("Mutation error occurred:", err);
-      setOpen(true);
-      setNotification("Mutation error occurred: " + err.message);
-      setTimeout(() => setOpen(false), 6000); // Automatically close the Snackbar after 6 seconds
-      // Optionally, set a global error state here if needed
+      showNotification("Mutation error occurred: " + err.message, "error");
       setErrors((prevErrors) => ({ ...prevErrors, global: err.message }));
     },
   });
 
-  // 3. Centralised change handler for text, radios, AND checkboxes
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
 
     setFormData((prevData) => ({
       ...prevData,
-      // If it's a checkbox, store the 'checked' boolean; otherwise, store the text 'value'
       [name]: type === "checkbox" ? checked : value,
     }));
 
-    // Clear error for this field when the user modifies it
     if (errors[name]) {
       setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
     }
   };
 
-  // 4. Form submission logic
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    // Basic validation check before sending data
     const newErrors = {};
     if (!formData.title.trim()) newErrors.title = "Title is required";
-    // if (!formData.termsAccepted) newErrors.termsAccepted = "You must accept the terms";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      return; // Stop submission
+      return;
     }
 
-    console.log("Final Form Data:", formData);
-    // Send to backend/API here
     addSong({ variables: { title: formData.title } });
   };
 
@@ -112,7 +78,7 @@ export default function AdvancedMuiForm() {
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 3, // Comfortable spacing between FormControls
+        gap: 3,
         maxWidth: 450,
         margin: "auto",
         mt: 4,
@@ -122,79 +88,30 @@ export default function AdvancedMuiForm() {
         backgroundColor: "#fff",
       }}
     >
-      <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        open={open}
-        autoHideDuration={6000}
-        onClose={handleClose}
-        message={notification}
-        action={action}
-      />
       <Typography variant="h5" textAlign="center" fontWeight="bold">
         Create New Song
       </Typography>
 
-      {/* Text Field - High-level wrapper (built-in FormControl) */}
+      {/* Fix 3: Removed defaultValue and updated label to "Song Title" */}
       <TextField
-        label="Song Title"
+        required
         name="title"
+        id="outlined-required"
+        label="Song Title"
         value={formData.title}
         onChange={handleChange}
         error={!!errors.title}
         helperText={errors.title}
-        fullWidth
-        required
-        disabled={loading} // Disable field while loading
+        disabled={loading}
+        sx={{
+          "& .MuiInputBase-input": {
+            padding: "0px 20px", // Adjust inner padding safely
+          },
+        }}
       />
 
-      {/* Radio Buttons using FormControl */}
-      {/* <FormControl component="fieldset">
-        <FormLabel id="plan-radio-group-label" sx={{ fontWeight: "500", mb: 0.5 }}>
-          Subscription Plan
-        </FormLabel>
-        <RadioGroup
-          aria-labelledby="plan-radio-group-label"
-          name="subscriptionPlan"
-          value={formData.subscriptionPlan}
-          onChange={handleChange}
-          row // Displays radios horizontally side-by-side
-        >
-          <FormControlLabel value="free" control={<Radio />} label="Free" />
-          <FormControlLabel value="premium" control={<Radio />} label="Premium" />
-          <FormControlLabel value="enterprise" control={<Radio />} label="Enterprise" />
-        </RadioGroup>
-      </FormControl> */}
-
-      {/* Checkboxes grouped inside a FormControl */}
-      {/* <FormControl component="fieldset" error={!!errors.termsAccepted}>
-        <FormLabel component="legend" sx={{ fontWeight: "500", mb: 0.5 }}>
-          Preferences & Legal
-        </FormLabel>
-        <FormGroup>
-          <FormControlLabel
-            control={<Checkbox name="marketingEmails" checked={formData.marketingEmails} onChange={handleChange} />}
-            label="Receive weekly marketing emails"
-          />
-
-          <FormControlLabel
-            control={<Checkbox name="termsAccepted" checked={formData.termsAccepted} onChange={handleChange} color="primary" />}
-            label="I accept the terms and conditions *"
-          />
-        </FormGroup>
-        {errors.termsAccepted && <FormHelperText>{errors.termsAccepted}</FormHelperText>}
-      </FormControl> */}
-
-      {/* Submit Button */}
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        fullWidth
-        size="large"
-        sx={{ mt: 1 }}
-        disabled={loading} // Prevent double submissions
-      >
-        {loading ? <CircularProgress size={24} color="inherit" /> : "Save Changes"}
+      <Button type="submit" variant="contained" color="primary" fullWidth size="large" sx={{ mt: 1 }} disabled={loading}>
+        {loading ? <CircularProgress size={24} color="inherit" /> : "Save Song"}
       </Button>
     </Box>
   );

@@ -1,4 +1,5 @@
 import React from "react";
+import AddCircleOutlinedIcon from "@mui/icons-material/AddCircleOutlined";
 import Spinner from "@mui/material/CircularProgress";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -11,6 +12,8 @@ import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
+import { Link } from "react-router-dom";
+import { Grid } from "@mui/material";
 
 // Defined the query outside the component (best practice)
 const FETCH_SONGS = gql`
@@ -48,9 +51,25 @@ const SongList = () => {
 
   return (
     <Box sx={{ padding: 2, boxShadow: 3, bgcolor: "background.paper", borderRadius: 1 }}>
-      <Typography variant="h4" component="h2" gutterBottom>
-        Song List
-      </Typography>
+      <Grid
+        container
+        direction="row"
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Grid item>
+          <Typography variant="h4" component="h2" gutterBottom>
+            Song List
+          </Typography>
+        </Grid>
+        <Grid item>
+          <Link to="/song/new">
+            <AddCircleOutlinedIcon />
+          </Link>
+        </Grid>
+      </Grid>
       <TableContainer>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
